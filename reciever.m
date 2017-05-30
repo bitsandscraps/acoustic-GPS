@@ -59,6 +59,8 @@ uicontrol('Style', 'pushbutton', 'String', 'Close', ...
 function callBackHelper(event, delta)
 offset = round((delta / 2) * 44100);
 THRESHOLD = 0.005;
+TEMPERATURE = 20;   % in degrees Celsius
+speedOfSound = 331.3 * sqrt(1 + TEMPERATURE / 273.15);
 x = diff(mean(event.Data, 2));
 index1 = find(x > THRESHOLD, 1);
 if isempty(index1)
@@ -79,7 +81,7 @@ end
 timestamps = event.TimeStamps([index1 index2 index3 index4]);
 timestamps = timestamps - event.TimeStamps(index1);
 timestamps = timestamps - (0:3)' * delta;
-r = timestamps * 340;
+r = timestamps * speedOfSound;
 pos = findPosition(r') * 100;
 ax = gca;
 if isempty(ax.Children(1).XData)
