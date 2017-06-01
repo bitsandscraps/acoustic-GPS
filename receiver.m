@@ -2,10 +2,10 @@
 % receiver.m
 % Copyright 2017 by KIM Kwanwoo and PARK Jongeui
 % First written: 2017-05-24
-% Last updated:  2017-05-26
+% Last updated:  2017-05-31
 
 %% Figure Setup
-f = gcf;
+f = figure(1);
 f.MenuBar = 'none';
 f.Position = f.Position + [0 -200 0 150];
 width = f.Position(3);
@@ -45,23 +45,28 @@ uicontrol('Style', 'pushbutton', 'String', 'Close', ...
           'FontSize', 12, 'Callback', @callbackClose);
 
 %% DAQ Setup
-% global sMic
-% d = daq.getDevices;
-% sMic = daq.createSession('directsound');
-% addAudioInputChannel(sMic, 'Audio0', 1:2);
-% sMic.IsContinuous = true;
-% sMic.Rate = fs;
-% sMic.NotifyWhenDataAvailableExceeds = fs * delta * 4;
-% callBackMic = @(~, event) callBackHelper(event, delta, textbox_pos);
-% listenerMic = addlistener(sMic, 'DataAvailable', callBackMic);
-% startBackground(sMic)
+global sMic
+d = daq.getDevices;
+sMic = daq.createSession('directsound');
+addAudioInputChannel(sMic, 'Audio0', 1:2);
+sMic.IsContinuous = true;
+sMic.Rate = fs;
+sMic.NotifyWhenDataAvailableExceeds = fs * delta * 4;
+callBackMic = @(~, event) callBackHelper(event, delta, textbox_pos, ...
+                                         xlimits, ylimits);
+listenerMic = addlistener(sMic, 'DataAvailable', callBackMic);
 
-function callBackHelper(event, delta)
+function callBackHelper(event, delta, tbPos, xlimits, ylimits)
+global X
+global Y
+global init
 offset = round((delta / 2) * 44100);
-THRESHOLD = 0.005;
-TEMPERATURE = 20;   % in degrees Celsius
+THRESHOLD = 0.05;
+TEMPERATURE = 26.5;   % in degrees Celsius
 speedOfSound = 331.3 * sqrt(1 + TEMPERATURE / 273.15);
 x = diff(mean(event.Data, 2));
+% figure(2)
+% plot(x)
 index1 = find(x > THRESHOLD, 1);
 if isempty(index1)
     return
@@ -83,6 +88,18 @@ timestamps = timestamps - event.TimeStamps(index1);
 timestamps = timestamps - (0:3)' * delta;
 r = timestamps * speedOfSound;
 pos = findPosition(r') * 100;
+if init
+    while (pos(1) > 30) || (pos (2) > 30)
+        X = X([2 3 4 1]);
+        Y = Y([2 3 4 1]);
+        pos = findPosition(r') * 100;
+    end
+    init = false;
+end
+if pos(1) < xlimits(1) || pos(1) > xlimits(2) || pos(2) < ylimits(1) || pos(2) > ylimits(2)
+    return
+end
+figure(1)
 ax = gca;
 if isempty(ax.Children(1).XData)
     % need to continue the stroke
@@ -94,11 +111,11 @@ else
     % need to update the current position
     set(ax.Children(1), 'XData', pos(1), 'YData', pos(2))
 end
-tbPos = findall(gcf, 'Type', 'TextBox');
 tbPos.String = sprintf('x = % 2.1f    y = % 2.1f', pos(1), pos(2));
 end
 
 function callbackDraw(hObject, ~)
+figure(1)
 ax = gca;
 if hObject.Value == hObject.Min     % the button is off (not drawing)
     set(ax.Children(1), 'XData', NaN, 'YData', NaN);
@@ -113,12 +130,14 @@ end
 end
 
 function callbackClear(~, ~)
+figure(1)
 ax = gca;
 set(ax.Children(2), 'XData', [], 'YData', [])
 end
 
 function callbackDone (~, ~)
 %% Leave only the lines
+figure(1)
 ax = gca;
 ax.Children(1).Marker = 'none';
 ax.Children(2).Marker = 'none';
@@ -131,7 +150,21 @@ grid off
 %% Image processing
 F = getframe;
 result = frame2im(F);   %% TODO - use result
+% w = size(result, 1);
+% h = size(result, 2);
+% if w > h
+%     start = round((w - h) / 2);
+%     bg = ones(w, w, 3) * 255;
+%     bg(:, start:(start + h - 1), :) = result;
+% else
+%     start = round((h - w) / 2);
+%     bg = ones(h, h, 3) * 255;
+%     bg(start:(start + w - 1), :, :) = result;
+% end
+figure
+imshow(result)
 %% Recover original state
+figure(1)
 ax.XColor = original_cond{1};
 ax.YColor = original_cond{2};
 ax.XTick = original_cond{3};
@@ -142,9 +175,9 @@ ax.Children(2).Marker = 'o';
 end
 
 function callbackClose(~, ~)
-% global sMic
-% global sSpeaker
-% stop(sMic)
-% stop(sSpeaker)
-delete(gcf)
+global sMic
+global sSpeaker
+stop(sMic)
+stop(sSpeaker)
+delete(figure(1))
 end

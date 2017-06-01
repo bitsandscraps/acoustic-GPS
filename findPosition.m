@@ -5,8 +5,8 @@
 % Last updated:  2017-05-26
 
 function position = findPosition( R )
-X = [0 0.891 0 0.891];
-Y = [0 0 0.42 0.42];
+global X
+global Y
 INITIAL = [0.5 0.5 0];
 OPTIONS = optimoptions(@lsqnonlin, 'Algorithm', 'levenberg-marquardt', ...
                        'display', 'off');
