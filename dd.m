@@ -1,2 +1,2 @@
-delete(listenerSpeaker)
-delete(listenerMic)
+stop(sMic)
+stop(sSpeaker)
