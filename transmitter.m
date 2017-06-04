@@ -2,6 +2,7 @@
 % transmitter.m
 % Copyright 2017 by KIM Kwanwoo and PARK Jongeui
 % First written: 2017-05-26
+% Last updated: 2017-06-04
 
 %% Sound Template Generation
 offset = delta * fs;

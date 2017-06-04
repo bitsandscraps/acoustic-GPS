@@ -2,7 +2,7 @@
 % receiver.m
 % Copyright 2017 by KIM Kwanwoo and PARK Jongeui
 % First written: 2017-05-24
-% Last updated:  2017-05-31
+% Last updated:  2017-06-04
 
 %% Figure Setup
 f = figure(1);
@@ -66,6 +66,7 @@ THRESHOLD = 0.05;
 TEMPERATURE = 26.5;   % in degrees Celsius
 speedOfSound = 331.3 * sqrt(1 + TEMPERATURE / 273.15);
 x = diff(mean(event.Data, 2));
+% Code for Debugging
 % figure(2)
 % plot(x)
 index1 = find(x > THRESHOLD, 1);
@@ -97,7 +98,8 @@ if init
     end
     init = false;
 end
-if pos(1) < xlimits(1) || pos(1) > xlimits(2) || pos(2) < ylimits(1) || pos(2) > ylimits(2)
+if pos(1) < xlimits(1) || pos(1) > xlimits(2) ...
+        || pos(2) < ylimits(1) || pos(2) > ylimits(2)
     return
 end
 figure(1)
@@ -151,17 +153,6 @@ grid off
 %% Image processing
 F = getframe;
 result = frame2im(F);   %% TODO - use result
-% w = size(result, 1);
-% h = size(result, 2);
-% if w > h
-%     start = round((w - h) / 2);
-%     bg = ones(w, w, 3) * 255;
-%     bg(:, start:(start + h - 1), :) = result;
-% else
-%     start = round((h - w) / 2);
-%     bg = ones(h, h, 3) * 255;
-%     bg(start:(start + w - 1), :, :) = result;
-% end
 figure
 imshow(result)
 %% Recover original state
