@@ -16,5 +16,3 @@ X = [0 0.891 0 0.891];
 Y = [0 0 0.42 0.42];
 transmitter;    % start transmitter
 receiver;       % start receiver
-startBackground(sSpeaker);
-startBackground(sMic);

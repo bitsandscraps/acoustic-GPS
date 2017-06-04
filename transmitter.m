@@ -23,3 +23,4 @@ listenerSpeaker = ...
 for i = 1:ceil(22050 / size(soundTemplate, 1))  % minimum queue is 22050
     queueOutputData(sSpeaker, soundTemplate);
 end
+startBackground(sSpeaker);

@@ -55,6 +55,7 @@ sMic.NotifyWhenDataAvailableExceeds = fs * delta * 4;
 callBackMic = @(~, event) callBackHelper(event, delta, textbox_pos, ...
                                          xlimits, ylimits);
 listenerMic = addlistener(sMic, 'DataAvailable', callBackMic);
+startBackground(sMic);
 
 function callBackHelper(event, delta, tbPos, xlimits, ylimits)
 global X
